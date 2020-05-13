@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * @Author YangJinG
@@ -13,16 +14,22 @@ import javax.persistence.*;
  * @Date 2020/5/12
  */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-public class Message {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer msgId;
+    private Long userId;
+    @Column(nullable = false, unique = true)
+    private String userName;
+    @Column(length = 32)
+    private String nickName;
     @Column(nullable = false)
-    private String msgText;
-    @Column(nullable = true, length = 32)
-    private String msgSummary;
+    private String password;
+    @Column
+    private Integer age;
+    @Column
+    private LocalDateTime regTime;
 }

@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "spring.time-zone.hikari.max-lifetime",
+      "type": "java.lang.String",
+      "description": "Description for spring.time-zone.hikari.max-lifetime."
+  }
+] }

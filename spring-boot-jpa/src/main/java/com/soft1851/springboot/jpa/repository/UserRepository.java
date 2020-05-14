@@ -1,6 +1,9 @@
 package com.soft1851.springboot.jpa.repository;
 
 import com.soft1851.springboot.jpa.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,70 +13,143 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * @Author YangJinG
- * @Description 基础的UserRepository，从父接口继承CRUD findBy返回一个User，findUsersBy返回一组User
- * @Date 2020/5/13
+ * @Author: YangJinG
+ * @Date: 2020/5/13 7:51
+ * @Description:
  */
 public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
-     * 根据方法名解析：按userName和password查询唯一记录
+     * 根据方法名解析：按userName和password相等查询唯一记录
      *
      * @param userName
      * @param password
-     * @return user
+     * @return
      */
-    User findByUserNameAndPassword(String userName, String password);
+    User findByUserNameEqualsAndPasswordEquals(String userName, String password);
 
     /**
      * 根据方法名解析：按nickName模糊查询一组记录
      *
      * @param nickName
-     * @return List<User>
+     * @return
      */
-    List<User> findByNickName(String nickName);
+    List<User> findUsersByNickNameLike(String nickName);
 
     /**
      * 根据方法名解析：查询年龄大于指定age的所有用户
-     *
      * @param age
-     * @return List<User>
+     * @return
      */
     List<User> findUsersByAgeGreaterThan(int age);
 
     /**
-     * 自定义SQL查询，类似 Hibernate的 HQL语法，在接口上使用 @Query
-     *
-     * @param userId
+     * 根据用户名查询用户
+     * @param userName
      * @return User
      */
-    @Query("select u from User u where u.userId = ?1")
-    User findById(long userId);
+    User findByUserName(String userName);
 
     /**
-     * 按id修改nickName
-     *
-     * @param nickName
-     * @param userId
-     * @return int
+     * 关键字查询用户
+     * @param username
+     * @param email
+     * @return List<User>
      */
-    @Modifying
-    @Transactional(rollbackFor = RuntimeException.class)
-    @Query(value = "update user set nick_name = ?1 where user_id = ?2", nativeQuery = true)
-    int updateNickName(String nickName, long userId);
-
+    List<User> findByUserNameOrEmail(String username,String email);
 
     /**
-     * 插入
      *
+     * @param id
+     * @return
+     */
+//    Long deleteById(Long id);
+
+    /**
+     * 根据用户名统计
      * @param userName
-     * @param password
-     * @param nickName
-     * @return int
+     * @return
      */
+    Long countByUserName(String userName);
+
+    /**
+     * 根据邮箱模糊查询用户
+     * @param email
+     * @return
+     */
+    List<User> findByEmailLike(String email);
+
+    /**
+     * 根据用户名查询用户，忽略大小写
+     * @param userName
+     * @return
+     */
+    User findByUserNameIgnoreCase(String userName);
+
+    /**
+     * 根据用户名查询用户，根据邮箱降序
+     * @param email
+     * @return
+     */
+    List<User> findByUserNameOrderByEmailDesc(String email);
+
+
+    @Query("select u from User u")
+    Page<User> findALL(Pageable pageable);
+
+    /**
+     * 查询中有多个参数的时候 Pageable 建议作为最后一个参数传入。
+     * @param nickName
+     * @param pageable
+     * @return
+     */
+    @Query(value ="select * from user u where u.nick_name = ?1", nativeQuery = true)
+    Page<User> findByNickName(String nickName, Pageable pageable);
+
+    @Query(value ="select * from user u where u.nick_name = ?1 and u.email = ?2", nativeQuery = true)
+    Slice<User> findByNickNameAndEmail(String nickName, String email, Pageable pageable);
+
+//    @Query("select u from User u where u.nickName = :nickName")
+//    Page<User> findByNickName(@Param("nickName") String nickName, Pageable pageable);
+
+
+    @Transactional(timeout = 10,rollbackFor = RuntimeException.class)
+    @Modifying
+    @Query("update User set userName = ?1 where id = ?2")
+    int modifyById(String  userName, Long id);
+
+//    @Transactional(timeout = 10,rollbackFor = RuntimeException.class)
+//    @Modifying
+//    @Query("delete from User where id = ?1")
+//    void deleteById(Long id);
+
+
+    @Query("select u from User u where u.id = ?1")
+    User findById(long id);
+
+
+    @Modifying
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Query(value = "update user set nick_name = ?1 where id = ?2", nativeQuery = true)
+    int updateNickName(String nickName, long id);
+
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Modifying
-    @Query(value = "insert into user(user_name, password,nick_name) values (:userName, :password,:nickName)", nativeQuery = true)
-    int insertUser(@Param("userName") String userName, @Param("password") String password, @Param("nickName") String nickName);
+    @Query(value = "insert into user(user_name, password,email) values (:userName, :password,:email)", nativeQuery = true)
+    int insertUser(@Param("userName") String userName, @Param("password") String password, @Param("email") String email);
+
+
+//自定义查询
+//    User findFirstByOrderByLastnameAsc();
+//    User findTopByOrderByAgeDesc();
+//    Page<User> queryFirst10ByLastname(String lastname, Pageable pageable);
+//    List<User> findFirst10ByLastname(String lastname, Sort sort);
+//    List<User> findTop10ByLastname(String lastname, Pageable pageable);
+
+    List<User> findFirst10ByNickName(String nickName , Pageable pageable);
+
+    @Query(value = "select user_name,age,nick_name from user where id = ?1",nativeQuery = true)
+    User findUserById(long id);
 
 }

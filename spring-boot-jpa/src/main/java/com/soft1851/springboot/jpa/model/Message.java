@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 /**
- * @Author YangJinG
- * @Description
- * @Date 2020/5/12
+ * @Author: YangJinG
+ * @Date: 2020/5/12 19:28
+ * @Description:
  */
 @Data
 @Builder

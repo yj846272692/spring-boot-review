@@ -1,27 +1,24 @@
 package com.soft1851.springboot.jpa.repository;
 
+import com.soft1851.springboot.jpa.model.Authority;
 import com.soft1851.springboot.jpa.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import javax.annotation.Resource;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @Author YangJinG
- * @Description
- * @Date 2020/5/14
+ * @Author: zw_w
+ * @Date: 2020/5/13 15:13
+ * @Description:
  */
 @SpringBootTest
 @Slf4j
@@ -29,68 +26,112 @@ class UserRepositoryTest {
     @Resource
     private UserRepository userRepository;
 
+    /**
+     * 使用该save方法进行更新时会发现，更新全部字段时会正常实现，可是在只更新部分字段时，会发现没有更新的字段被置为null；
+     */
     @Test
-    void testSave() {
-        User user = User.builder()
-                .userName("user")
-                .password("user")
-                .nickName("github")
-                .age(20)
-                .regTime(LocalDateTime.now()).build();
-        userRepository.save(user);
-
-        List<User> users = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            User testUser = User.builder()
-                    .userName("user" + i)
-                    .password("user" + i)
-                    .nickName("nickName" + i)
-                    .age(new Random().nextInt(50))
-                    .regTime(LocalDateTime.now()).build();
-            users.add(testUser);
+    void testSave(){
+        List<User> userList = new ArrayList<>();
+        for (int i = 0;i < 30 ; i++){
+            User user= User.builder()
+                    .userName("user"+i)
+                    .email("11111"+i+"@qq.com")
+                    .password("232623")
+                    .nickName("name"+i)
+                    .age(10+i)
+                    .regTime(LocalDateTime.now())
+                    .build();
+            userList.add(user);
         }
-        userRepository.saveAll(users);
-//        assertEquals(21, userRepository.findAll().size());
+        System.out.println(userRepository.saveAll(userList).size());
+
+    }
+
+    /**
+     * 默认方法
+     */
+    @Test
+    public void testBaseQuery() {
+//        System.out.println(userRepository.findAll().size());
+//
+//        assertNotNull(userRepository.findById(1L).get().getAge());
+
+        User saveUser= User.builder()
+                .userName("测试")
+                .email("test")
+                .password("232623")
+                .nickName("test")
+                .age(10)
+                .regTime(LocalDateTime.now())
+                .build();
+        userRepository.save(saveUser);
+//
+//        User delUser = User.builder()
+//                .userName("测试")
+//                .email("test")
+//                .password("232623")
+//                .nickName("test")
+//                .age(10)
+//                .regTime(LocalDateTime.now())
+//                .build();
+//        userRepository.delete(delUser);
+
+//        userRepository.count();
+//
+//        assert(userRepository.existsById(1l));
+
     }
 
     @Test
-    void testUpdate() {
-        //使用save活saveAndFlush方法更新数据，必须要提供所有字段值，否则该字段为空
-        User user = User.builder()
-                .userId(1L)
-                .userName("修改后姓名")
-                .password("修改后密码")
-                .nickName("修改后昵称")
-                .age(12)
-                .regTime(LocalDateTime.now()).build();
-        userRepository.saveAndFlush(user);
-        //可以自定义SQL实现更新
-        int n = userRepository.updateNickName("新昵称", 1L);
-        assertEquals(1, n);
-    }
-
-
-    @Test
-    void testInsert() {
-        //自定义插入
-        int n = userRepository.insertUser("123", "123", "自定义");
-        assertEquals(1, n);
-    }
-
-
-    @Test
-    void testDelete() {
-        //自带删除方法
-        userRepository.deleteById(77L);
+    void findByUserNameEqualsAndPasswordEquals() {
+        User resultUser = userRepository.findByUserNameEqualsAndPasswordEquals("user1","232623");
+        assertNotNull(resultUser.getId());
     }
 
     @Test
-    void testSelect() {
-        // 查询所有
+    void findUsersByNickNameLike() {
+        List<User> userList = userRepository.findUsersByNickNameLike("name1");
+        userList.forEach(user -> System.out.println(user.getUserName()));
+    }
+
+    @Test
+    void findUsersByAgeGreaterThan() {
+        System.out.println(userRepository.findUsersByAgeGreaterThan(15).size());
+    }
+
+    @Test
+    void findByUserName() {
+        assertNotNull(userRepository.findByUserName("user1").getEmail());
+    }
+
+    @Test
+    void findByUserNameOrEmail() {
+        List<User> userList = userRepository.findByUserNameOrEmail("user","111111@qq.com");
+        assertEquals(userList.size(),1);
+    }
+
+    @Test
+    void countByUserName() {
+        System.out.println(userRepository.countByUserName("user1"));
+    }
+
+    @Test
+    void findByEmailLike() {
+        System.out.println(userRepository.findByEmailLike("111111@qq.com").size());
+    }
+
+
+    /**
+     * https://blog.csdn.net/qq_35953966/article/details/104061854
+     */
+    @Test
+    void findALL() {
+        int page = 1 ,size = 2;
+//        Sort sort = new Sort(Sort.Direction.DESC, "id");
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, size, sort);
         userRepository.findAll().forEach(user -> log.info(user.toString()));
-        // 分页查询全部，返回封装了的分页信息， jpa页码从0开始
-        Page<User> pageInfo = userRepository.findAll(
-                PageRequest.of(1, 3, Sort.Direction.ASC, "userId"));
+        Page<User> pageInfo  =  userRepository.findALL(pageable);
         log.info("总记录数： {}", pageInfo.getTotalElements());
         log.info("当前页记录数： {}", pageInfo.getNumberOfElements());
         log.info("每页记录数： {}", pageInfo.getSize());
@@ -99,40 +140,63 @@ class UserRepositoryTest {
         log.info("当前页（从0开始计）： {}", pageInfo.getNumber());
         log.info("是否为首页： {}", pageInfo.isFirst());
         log.info("是否为尾页： {}", pageInfo.isLast());
-        // 条件查询
-        User user = User.builder().userName("saber").build();
-        List<User> users = userRepository.findAll(Example.of(user));
-        log.info("满足条件的记录有：");
-        users.forEach(user1 -> log.info(user1.toString()));
-        // 单个查询
-        User user1 = User.builder().userId(2L).build();
-        Optional<User> optionalUser = userRepository.findOne(Example.of(user1));
-        log.info("单个查询结果： {}", optionalUser.orElse(null));
-    }
 
-    //根据方法名解析的基础功能
-    @Test
-    void findByUserNameAndPassword() {
-
-        User user = userRepository.findByUserNameAndPassword("333","333");
-        log.info(String.valueOf(user));
     }
 
     @Test
     void findByNickName() {
-        List<User> users = userRepository.findByNickName("nickName");
-        users.forEach(user -> log.info(user.toString()));
+        int page=1,size=2;
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        userRepository.findByNickName("name1", pageable);
     }
 
     @Test
-    void findUsersByAgeGreaterThan() {
-        List<User> users = userRepository.findUsersByAgeGreaterThan(20);
-        users.forEach(user -> log.info(user.toString()));
+    void findByNickNameAndEmail() {
+        int page=1,size=2;
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Slice<User> users =  userRepository.findByNickNameAndEmail("name1","222222@qq.com",pageable);
+        System.out.println(users.getSize());
     }
 
     @Test
-    void  findById() {
-        User user = userRepository.findById(1L);
-        log.info(user.toString());
+    void modifyById() {
+        userRepository.modifyById("test",1L);
+    }
+
+    @Test
+    void findById() {
+        System.out.println(userRepository.findById(1l).getUserName());
+    }
+
+    @Test
+    void updateNickName() {
+        userRepository.updateNickName("test",1l);
+    }
+
+    @Test
+    void insertUser() {
+        userRepository.insertUser("test2","123456","24525245");
+    }
+
+    @Test
+    void findFirst10ByNickName() {
+        int page=0,size=2;
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        System.out.println(userRepository.findFirst10ByNickName("name5",pageable).size());
+    }
+
+    @Test
+    void testManyToMany(){
+        System.out.println("***************************************");
+        User user = userRepository.findById(1);
+        System.out.println(user.getNickName()+","+user.getUserName()+","+user.getAge());
+        List<Authority> authorityList = user.getAuthorityList();
+        authorityList.forEach(authority -> {
+            System.out.println(authority.getName()+","+authority.getId());
+        });
+
     }
 }

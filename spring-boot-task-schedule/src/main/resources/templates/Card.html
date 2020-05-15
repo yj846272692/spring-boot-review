@@ -1,0 +1,59 @@
+<!doctype html>
+
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>卡片</title>
+
+
+    <style>
+        *{margin: 0;padding: 0;}
+        .wrap
+        {
+            width: 600px;
+            height: 400px;
+            background-image: url(https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=920673963,342124957&fm=23&gp=0.jpg);
+            background-size: cover;
+            background-position: center center;
+            margin: 100px auto;
+            padding: 100px;
+            text-align: center;
+        }
+
+
+        .main
+        {
+            margin: 100px auto;
+            padding: 70px;
+            background-image: url(https://soft-1851-yj.oss-cn-beijing.aliyuncs.com/img/1.jpg);
+            background-position: center;
+            background-size: cover;
+            width: 250px;
+            height: 170px;
+            transform: rotate(-30deg);
+        }
+
+        .name{
+            font-size: 30px;
+            font-family:STFangsong;
+        }
+        .realName{
+            font-size: 25px;
+            font-family:STFangsong;
+        }
+    </style>
+
+
+</head>
+<body>
+<div class="wrap" >
+    <div class="main">
+        <br>
+        <br>
+        <p class="name" th:text="${name}"></p>
+        <br>
+        <span class="realName" th:text="${realName}"></span>
+    </div>
+</div>
+</body>
+</html>

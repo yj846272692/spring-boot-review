@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * @Date: 2020/5/14
  * @Description:
  */
-@Component
+//@Component
 public class Task1 {
     private int count = 0;
 

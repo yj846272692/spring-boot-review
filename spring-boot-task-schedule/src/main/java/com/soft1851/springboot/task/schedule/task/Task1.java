@@ -1,5 +1,7 @@
 package com.soft1851.springboot.task.schedule.task;
 
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +11,8 @@ import org.springframework.stereotype.Component;
  * @Description:
  */
 //@Component
+//@EnableAsync
+
 public class Task1 {
     private int count = 0;
 

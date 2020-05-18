@@ -17,7 +17,7 @@ import javax.annotation.Resource;
  * @Date 2020/5/15
  **/
 @Slf4j
-@Component
+//@Component
 public class AutoTask implements SchedulingConfigurer {
     @Resource
     protected CronRepository cronRepository;

@@ -1,14 +1,20 @@
 package com.soft1851.springboot.task.schedule.service;
 
 
+import com.soft1851.springboot.task.schedule.task.AutoTask;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.thymeleaf.TemplateEngine;
 
 import org.thymeleaf.context.Context;
 
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +25,8 @@ class MailServiceTest {
     private MailService mailService;
     @Resource
     private TemplateEngine templateEngine;
-
+    @Autowired
+    JavaMailSenderImpl javaMailSender;
     /**
      * 发送纯文本
      */
@@ -82,6 +89,22 @@ class MailServiceTest {
         String emailContent = templateEngine.process("Card", context);
         mailService.sendHtmlMail("846272692@qq.com","主题：模板邮件[生日快乐!]",emailContent);
     }
+
+    @Test
+    public void sendAsyncTaskMail() throws  Exception{
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+        mimeMessageHelper.setSubject("通知");
+        mimeMessageHelper.setText("！！！");
+        mimeMessageHelper.setTo("846272692@qq.com");
+        mimeMessageHelper.setFrom("846272692@qq.com");
+        mimeMessageHelper.addAttachment("AutoTask.java",new File("D:\\spring-boot-review\\spring-boot-task-schedule\\src\\main\\java\\com\\soft1851\\springboot\\task\\schedule\\task\\AutoTask.java"));
+        javaMailSender.send(mimeMessage);
+
+
+
+    }
+
 
 
 
